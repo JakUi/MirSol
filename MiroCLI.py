@@ -26,7 +26,7 @@ def find_element_on_board(element_color, field_type):
     match = [match.value for match in jsonpath_expression.find(json_data)]
     # print(match)
     if match != []:
-        result = match[0].replace('<p>', '').replace('</p>', '')
+        result = match[0].replace('<p>', '').replace('</p>', '').replace('<br />', '')
     else:
         result = f"{field_type} not found!"
     return result
@@ -47,9 +47,10 @@ def get_command(input_field_color):
 def run_command_in_cmd(command):
     try:
         result = subprocess.check_output(command, stderr=subprocess.STDOUT, shell=True, text=True)
-        print(result)
+        if result == '':
+            result = 'Done! Enter next command'
     except Exception as e:
-        result = print(str(e))
+        result = str(e)
     return result
 
 def push_output_result(output_field_color, command):
@@ -59,13 +60,16 @@ def push_output_result(output_field_color, command):
     position = return_element_position(board_id, element_id=output_field_id)
     position_x, position_y = position['x'], position['y']
     url = f"https://api.miro.com/v2/boards/{board_id}/texts/{output_field_id}"
+    print("CLI output:", cli_output)
     payload = {
               "data":{"content": f"{cli_output}"}, "position":{"origin":"center","x":f"{position_x}","y":f"{position_y}"}
               }
 
     headers = {"accept": "application/json", "content-type": "application/json", "authorization": f"{bearer_token}"}
     response = requests.patch(url, json=payload, headers=headers)
-    print(response.status_code)
+    if response.status_code != requests.codes.ok:
+        print(response.status_code)
+        print(response.text)
     return command
 
 last_command = None
