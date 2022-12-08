@@ -73,6 +73,4 @@ while True:
     command = get_command(input_field_color)
     if last_command != command:
         last_command = push_output_result(output_field_color, command)
-    else:
-        print("OK")
     time.sleep(1)
