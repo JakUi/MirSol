@@ -55,11 +55,12 @@ def push_output_result(output_field_color):
     cli_output = run_command_in_cmd(get_command(input_field_color))
     output_field_id = find_element_on_board(element_color=output_field_color, field_type="Output field")
     position = return_element_position(board_id, element_id=output_field_id)
-    print(position)
     position_x, position_y = position['x'], position['y']
-    print(position_x, position_y)
     url = f"https://api.miro.com/v2/boards/{board_id}/texts/{output_field_id}"
-    payload = {"data":{"content": f"{cli_output}"},"position":{"origin":"center","x":0,"y":0}}
+    payload = {
+              "data":{"content": f"{cli_output}"}, "position":{"origin":"center","x":f"{position_x}","y":f"{position_y}"}
+              }
+
     headers = {"accept": "application/json", "content-type": "application/json", "authorization": f"{bearer_token}"}
     response = requests.patch(url, json=payload, headers=headers)
     print(response.status_code)
