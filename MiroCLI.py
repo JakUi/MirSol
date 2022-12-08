@@ -1,7 +1,8 @@
 import requests
 import subprocess
-from jsonpath_ng.ext import parse
 import json
+import time
+from jsonpath_ng.ext import parse
 from Config import board_id, bearer_token
 
 
@@ -51,8 +52,9 @@ def run_command_in_cmd(command):
         result = print(str(e))
     return result
 
-def push_output_result(output_field_color):
-    cli_output = run_command_in_cmd(get_command(input_field_color))
+def push_output_result(output_field_color, command):
+    # command = get_command(input_field_color)
+    cli_output = run_command_in_cmd(command)
     output_field_id = find_element_on_board(element_color=output_field_color, field_type="Output field")
     position = return_element_position(board_id, element_id=output_field_id)
     position_x, position_y = position['x'], position['y']
@@ -64,6 +66,13 @@ def push_output_result(output_field_color):
     headers = {"accept": "application/json", "content-type": "application/json", "authorization": f"{bearer_token}"}
     response = requests.patch(url, json=payload, headers=headers)
     print(response.status_code)
+    return command
 
-
-push_output_result(output_field_color)
+last_command = None
+while True:
+    command = get_command(input_field_color)
+    if last_command != command:
+        last_command = push_output_result(output_field_color, command)
+    else:
+        print("OK")
+    time.sleep(1)
